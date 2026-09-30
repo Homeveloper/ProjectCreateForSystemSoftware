@@ -1,29 +1,38 @@
 #!/usr/bin/env bash
-# Полный набор проверок продукта. Отчёты складываются в reports/.
+# Полный набор проверок продукта.
+# Использование: scripts/check.sh [каталог-отчётов]
+# По умолчанию — reports/<текущий-тег-или-коммит>.
 # Скрипт не прерывается на находках: цель — собрать полную картину.
 set -u
 cd "$(dirname "$0")/.."
 export PATH="$PATH:$(cygpath -u "$(go env GOPATH)" 2>/dev/null || go env GOPATH)/bin"
-mkdir -p reports
+
+LABEL="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo local)}"
+DIR="reports/$LABEL"
+mkdir -p "$DIR"
+echo "Отчёты: $DIR"
+echo
 
 run() {
   local name="$1"; shift
-  echo "== $name"
-  "$@" >"reports/$name.txt" 2>&1
-  echo "   код возврата: $? -> reports/$name.txt"
+  printf '== %-14s ' "$name"
+  "$@" >"$DIR/$name.txt" 2>&1
+  echo "код возврата: $?"
 }
 
-echo "== gofmt"
-gofmt -l . | tee reports/gofmt.txt
-run vet        go vet ./...
-run test       go test ./... -count=1 -v
-run cover      go test ./... -count=1 -coverprofile=reports/coverage.out
-run staticcheck staticcheck ./...
-run gosec      gosec -fmt=text ./...
-run govulncheck govulncheck ./...
+printf '== %-14s ' gofmt
+gofmt -l . > "$DIR/gofmt.txt"
+echo "файлов без форматирования: $(wc -l < "$DIR/gofmt.txt")"
 
-if [ -f reports/coverage.out ]; then
-  go tool cover -func=reports/coverage.out | tail -1 | tee reports/coverage-total.txt
+run vet          go vet ./...
+run test         go test ./... -count=1 -v
+run cover        go test ./... -count=1 -coverprofile="$DIR/coverage.out"
+run staticcheck  staticcheck ./...
+run gosec        gosec -fmt=text -nocolor ./...
+run govulncheck  govulncheck ./...
+
+if [ -s "$DIR/coverage.out" ]; then
+  go tool cover -func="$DIR/coverage.out" | tail -1 | tee "$DIR/coverage-total.txt"
 fi
 echo
-echo "Отчёты готовы: reports/"
+echo "Готово."

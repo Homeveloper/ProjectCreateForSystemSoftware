@@ -1,0 +1,91 @@
+?   	github.com/Homeveloper/ProjectCreateForSystemSoftware/cmd/cfgtool	[no test files]
+=== RUN   TestRunRequiresCommand
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunRequiresCommand (0.00s)
+=== RUN   TestRunUnknownCommand
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunUnknownCommand (0.00s)
+=== RUN   TestRunVersionAndHelp
+cfgtool test
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunVersionAndHelp (0.00s)
+=== RUN   TestRunValidateWithSchema
+../../testdata/app.yaml: соответствует схеме ../../testdata/schema.json
+--- PASS: TestRunValidateWithSchema (0.00s)
+=== RUN   TestRunValidateReportsSchemaProblems
+  - $.service.mode: значение chaos не входит в допустимый набор
+  - $.service.name: значение "Billing_API" не соответствует шаблону "^[a-z0-9-]+$"
+  - $.service.port: значение 99999 больше максимального 65535
+  - $: отсутствует обязательное поле "database"
+--- PASS: TestRunValidateReportsSchemaProblems (0.00s)
+=== RUN   TestRunConvertWritesFile
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunConvertWritesFile2590665925\001\app.json
+--- PASS: TestRunConvertWritesFile (0.00s)
+=== RUN   TestRunMergeRequiresTwoFiles
+--- PASS: TestRunMergeRequiresTwoFiles (0.00s)
+=== RUN   TestRunRedactWritesFile
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunRedactWritesFile3070664862\001\safe.yaml
+--- PASS: TestRunRedactWritesFile (0.00s)
+PASS
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.017s
+=== RUN   TestDetectFormat
+--- PASS: TestDetectFormat (0.00s)
+=== RUN   TestLoadYAML
+--- PASS: TestLoadYAML (0.00s)
+=== RUN   TestLoadJSON
+--- PASS: TestLoadJSON (0.00s)
+=== RUN   TestLoadRejectsNonObjectRoot
+--- PASS: TestLoadRejectsNonObjectRoot (0.00s)
+=== RUN   TestEncodeRoundTrip
+--- PASS: TestEncodeRoundTrip (0.00s)
+=== RUN   TestMerge
+--- PASS: TestMerge (0.00s)
+=== RUN   TestRedact
+--- PASS: TestRedact (0.00s)
+=== RUN   TestSchemaAcceptsValidConfig
+--- PASS: TestSchemaAcceptsValidConfig (0.00s)
+=== RUN   TestSchemaReportsProblems
+--- PASS: TestSchemaReportsProblems (0.00s)
+=== RUN   TestSaveWritesFile
+--- PASS: TestSaveWritesFile (0.00s)
+PASS
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/config	0.016s

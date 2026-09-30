@@ -1,0 +1,3 @@
+	github.com/Homeveloper/ProjectCreateForSystemSoftware/cmd/cfgtool		coverage: 0.0% of statements
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.024s	coverage: 73.6% of statements
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/config	0.022s	coverage: 76.2% of statements
