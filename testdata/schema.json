@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "required": ["service", "database"],
+  "properties": {
+    "service": {
+      "type": "object",
+      "required": ["name", "port", "mode"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "mode": { "type": "string", "enum": ["production", "staging", "development"] }
+      }
+    },
+    "database": {
+      "type": "object",
+      "required": ["host", "port"],
+      "properties": {
+        "host": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

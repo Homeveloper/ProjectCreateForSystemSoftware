@@ -1,0 +1,15 @@
+service:
+  name: billing-api
+  port: 8080
+  mode: production
+database:
+  host: db.internal
+  port: 5432
+  user: billing
+  password: s3cr3t-db-password
+features:
+  - invoices
+  - refunds
+auth:
+  api_token: tok_live_9f3ac1
+  session_ttl: 3600
