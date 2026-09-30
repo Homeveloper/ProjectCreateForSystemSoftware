@@ -81,6 +81,7 @@ cfgtool redact testdata/app.yaml -o app.public.yaml --out-dir build
 go test ./...          # тесты, включая негативные проверки безопасности
 scripts/check.sh       # полный набор проверок, отчёты в reports/
 scripts/release.sh     # сборка выпуска с контрольными суммами
+scripts/reproduce-baseline.sh   # повторить проверки исходного состояния
 ```
 
 Результаты проверок и решение о выпуске — в [project.md](project.md).

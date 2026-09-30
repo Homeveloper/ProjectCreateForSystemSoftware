@@ -27,6 +27,7 @@
 ```
 scripts/check.sh <имя-каталога>
 scripts/probe-alias-bomb.sh <имя-каталога>
+scripts/reproduce-baseline.sh             # исходное состояние целиком
 ```
 
 Версии инструментов закреплены в `.github/workflows/ci.yml`:
