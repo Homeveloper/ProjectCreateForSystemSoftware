@@ -1,0 +1,35 @@
+Артефакты выпуска v1.0.0
+
+Собрано из чистого рабочего дерева на теге v1.0.0 командой:
+  scripts/release.sh v1.0.0
+
+Параметры сборки: CGO_ENABLED=0, -trimpath,
+  -ldflags "-s -w -X main.version=v1.0.0"
+
+=== Контрольные суммы SHA-256 ===
+94d505b8eacb830ab44255ac0b6d908646c7d0782e7f1b346f51a89541f74068 *cfgtool_v1.0.0_linux_amd64
+aaa7e3c0a36ed32b8c68af2dbf64c84da812dac9a9c6fa5abd24163363ebbc57 *cfgtool_v1.0.0_windows_amd64.exe
+
+=== Состав зависимостей, вшитых в бинарник ===
+dist/cfgtool_v1.0.0_linux_amd64: go1.26.6
+	path	github.com/Homeveloper/ProjectCreateForSystemSoftware/cmd/cfgtool
+	mod	github.com/Homeveloper/ProjectCreateForSystemSoftware	v1.0.0	
+	dep	gopkg.in/yaml.v3	v3.0.1	h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-trimpath=true
+	build	DefaultGODEBUG=containermaxprocs=0,cryptocustomrand=1,decoratemappings=0,tlssecpmlkem=0,tlssha1=1,updatemaxprocs=0,urlstrictcolons=0,x509sha256skid=0
+	build	CGO_ENABLED=0
+	build	GOARCH=amd64
+	build	GOOS=linux
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=94807a726f1afaf9e59d481e3f09c8a5fbb8b53c
+	build	vcs.time=2026-09-30T21:36:07Z
+	build	vcs.modified=false
+
+=== Проверка воспроизводимости ===
+Повторная сборка из того же состояния исходного кода даёт те же
+контрольные суммы. Сборка привязана к состоянию репозитория:
+Go вшивает в бинарник сведения о фиксации, поэтому суммы
+воспроизводятся именно для этого коммита.
