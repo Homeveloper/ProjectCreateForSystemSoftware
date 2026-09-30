@@ -1,0 +1,142 @@
+Негативные тесты безопасности на исходном состоянии продукта
+Состояние: v0.1.0-2-gf9b7fd8
+Платформа прогона: windows/amd64
+
+Каждое падение соответствует разрыву, зафиксированному в project.md.
+Два теста прав доступа пропускаются на Windows и выполняются в CI на Linux.
+
+==========================================================================
+?   	github.com/Homeveloper/ProjectCreateForSystemSoftware/cmd/cfgtool	[no test files]
+=== RUN   TestRunRequiresCommand
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunRequiresCommand (0.00s)
+=== RUN   TestRunUnknownCommand
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunUnknownCommand (0.00s)
+=== RUN   TestRunVersionAndHelp
+cfgtool test
+cfgtool — проверка и преобразование конфигураций YAML и JSON.
+
+Использование:
+  cfgtool <команда> [флаги] [аргументы]
+
+Команды:
+  validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
+  merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
+  redact   <файл> [-o <имя>]                   скрыть значения секретных полей
+  version                                      вывести версию
+  help                                         вывести эту справку
+
+Если -o не задан, результат выводится в стандартный поток вывода.
+--- PASS: TestRunVersionAndHelp (0.00s)
+=== RUN   TestRunValidateWithSchema
+../../testdata/app.yaml: соответствует схеме ../../testdata/schema.json
+--- PASS: TestRunValidateWithSchema (0.00s)
+=== RUN   TestRunValidateReportsSchemaProblems
+  - $.service.mode: значение chaos не входит в допустимый набор
+  - $.service.name: значение "Billing_API" не соответствует шаблону "^[a-z0-9-]+$"
+  - $.service.port: значение 99999 больше максимального 65535
+  - $: отсутствует обязательное поле "database"
+--- PASS: TestRunValidateReportsSchemaProblems (0.00s)
+=== RUN   TestRunConvertWritesFile
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunConvertWritesFile2281766212\001\app.json
+--- PASS: TestRunConvertWritesFile (0.00s)
+=== RUN   TestRunMergeRequiresTwoFiles
+--- PASS: TestRunMergeRequiresTwoFiles (0.00s)
+=== RUN   TestRunRedactWritesFile
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunRedactWritesFile4212006831\001\safe.yaml
+--- PASS: TestRunRedactWritesFile (0.00s)
+=== RUN   TestVerboseOutputDoesNotLeakSecrets
+../../testdata/app.yaml: синтаксис корректен, схема не задана
+    security_test.go:56: подробный вывод содержит значение секретного поля:
+        разобран ../../testdata/app.yaml: map[string]interface {}{"auth":map[string]interface {}{"api_token":"tok_live_9f3ac1", "session_ttl":3600}, "database":map[string]interface {}{"host":"db.internal", "password":"s3cr3t-db-password", "port":5432, "user":"billing"}, "features":[]interface {}{"invoices", "refunds"}, "service":map[string]interface {}{"mode":"production", "name":"billing-api", "port":8080}}
+--- FAIL: TestVerboseOutputDoesNotLeakSecrets (0.00s)
+=== RUN   TestConvertRefusesOutputOutsideOutDir
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesOutputOutsideOutDir1347142209\001\escaped.json
+    security_test.go:71: результат записан за пределы каталога --out-dir, ожидался отказ
+    security_test.go:74: файл создан за пределами каталога --out-dir: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesOutputOutsideOutDir1347142209\001\escaped.json
+--- FAIL: TestConvertRefusesOutputOutsideOutDir (0.00s)
+FAIL
+FAIL	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.020s
+=== RUN   TestDetectFormat
+--- PASS: TestDetectFormat (0.00s)
+=== RUN   TestLoadYAML
+--- PASS: TestLoadYAML (0.00s)
+=== RUN   TestLoadJSON
+--- PASS: TestLoadJSON (0.00s)
+=== RUN   TestLoadRejectsNonObjectRoot
+--- PASS: TestLoadRejectsNonObjectRoot (0.00s)
+=== RUN   TestEncodeRoundTrip
+--- PASS: TestEncodeRoundTrip (0.00s)
+=== RUN   TestMerge
+--- PASS: TestMerge (0.00s)
+=== RUN   TestRedact
+--- PASS: TestRedact (0.00s)
+=== RUN   TestSchemaAcceptsValidConfig
+--- PASS: TestSchemaAcceptsValidConfig (0.00s)
+=== RUN   TestSchemaReportsProblems
+--- PASS: TestSchemaReportsProblems (0.00s)
+=== RUN   TestSaveWritesFile
+--- PASS: TestSaveWritesFile (0.00s)
+=== RUN   TestSaveRejectsPathTraversal
+    security_test.go:35: Save("../escaped.json"): запись выполнена в C:\Users\MAXGAD~1\AppData\Local\Temp\TestSaveRejectsPathTraversal1796106972\001\escaped.json; ожидался отказ, имя выводит за пределы каталога
+    security_test.go:35: Save("sub/../../escaped.json"): запись выполнена в C:\Users\MAXGAD~1\AppData\Local\Temp\TestSaveRejectsPathTraversal1796106972\001\escaped.json; ожидался отказ, имя выводит за пределы каталога
+--- FAIL: TestSaveRejectsPathTraversal (0.00s)
+=== RUN   TestSaveUsesRestrictiveFilePermissions
+    security_test.go:43: права доступа POSIX на Windows не применяются
+--- SKIP: TestSaveUsesRestrictiveFilePermissions (0.00s)
+=== RUN   TestSaveUsesRestrictiveDirectoryPermissions
+    security_test.go:62: права доступа POSIX на Windows не применяются
+--- SKIP: TestSaveUsesRestrictiveDirectoryPermissions (0.00s)
+=== RUN   TestLoadRejectsOversizedFile
+    security_test.go:92: файл размером 20 МиБ принят целиком; ожидалось ограничение размера входных данных
+--- FAIL: TestLoadRejectsOversizedFile (0.26s)
+=== RUN   TestDecodeRejectsExcessiveNesting
+    security_test.go:102: вложенность глубиной 10000 принята; ожидалось ограничение глубины
+--- FAIL: TestDecodeRejectsExcessiveNesting (0.40s)
+=== RUN   TestDecodeErrorDoesNotLeakFileContent
+    security_test.go:115: сообщение об ошибке содержит значение секретного поля:
+        разбор YAML: yaml: line 3: did not find expected ',' or ']'; содержимое: database:
+          password: s3cr3t-db-password
+          broken: [unclosed
+--- FAIL: TestDecodeErrorDoesNotLeakFileContent (0.00s)
+=== RUN   TestValidationErrorDoesNotLeakSecretValue
+    security_test.go:133: отчёт о нарушении содержит значение секретного поля:
+        $.password: значение "s3cr3t-db-password" не соответствует шаблону "^[A-Z]+$"
+--- FAIL: TestValidationErrorDoesNotLeakSecretValue (0.00s)
+=== RUN   TestRedactCoversCommonSecretNames
+    security_test.go:148: поле "credentials" не скрыто, значение осталось в выводе: значение-2
+    security_test.go:148: поле "access_key" не скрыто, значение осталось в выводе: значение-3
+    security_test.go:148: поле "private-key" не скрыто, значение осталось в выводе: значение-4
+    security_test.go:148: поле "pwd" не скрыто, значение осталось в выводе: значение-1
+--- FAIL: TestRedactCoversCommonSecretNames (0.00s)
+FAIL
+FAIL	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/config	0.686s
+FAIL
