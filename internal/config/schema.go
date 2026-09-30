@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 // Schema — поддерживаемое подмножество JSON Schema.
@@ -80,24 +81,24 @@ func (s *Schema) check(value interface{}, at string, problems *[]string) {
 					fmt.Sprintf("%s: некорректный шаблон в схеме: %v", at, err))
 			} else if !pattern.MatchString(text) {
 				*problems = append(*problems,
-					fmt.Sprintf("%s: значение %q не соответствует шаблону %q", at, text, s.Pattern))
+					fmt.Sprintf("%s: значение %s не соответствует шаблону %q", at, presentValue(at, text), s.Pattern))
 			}
 		}
 	case "number", "integer":
 		if number, ok := toFloat(value); ok {
 			if s.Minimum != nil && number < *s.Minimum {
 				*problems = append(*problems,
-					fmt.Sprintf("%s: значение %v меньше минимального %v", at, number, *s.Minimum))
+					fmt.Sprintf("%s: значение %s меньше минимального %v", at, presentValue(at, number), *s.Minimum))
 			}
 			if s.Maximum != nil && number > *s.Maximum {
 				*problems = append(*problems,
-					fmt.Sprintf("%s: значение %v больше максимального %v", at, number, *s.Maximum))
+					fmt.Sprintf("%s: значение %s больше максимального %v", at, presentValue(at, number), *s.Maximum))
 			}
 		}
 	}
 	if len(s.Enum) > 0 && !inEnum(value, s.Enum) {
 		*problems = append(*problems,
-			fmt.Sprintf("%s: значение %v не входит в допустимый набор", at, value))
+			fmt.Sprintf("%s: значение %s не входит в допустимый набор", at, presentValue(at, value)))
 	}
 }
 
@@ -175,4 +176,30 @@ func inEnum(value interface{}, allowed []interface{}) bool {
 		}
 	}
 	return false
+}
+
+// fieldName выделяет имя поля из пути вида "$.database.password".
+func fieldName(at string) string {
+	name := at
+	if index := strings.LastIndex(name, "["); index >= 0 {
+		name = name[:index]
+	}
+	if index := strings.LastIndex(name, "."); index >= 0 {
+		name = name[index+1:]
+	}
+	return name
+}
+
+// presentValue готовит значение к выводу в отчёте о нарушениях.
+//
+// Отчёт попадает в журналы и в вывод сборочного конвейера, поэтому
+// значения полей, опознанных как секретные, заменяются маской.
+func presentValue(at string, value interface{}) string {
+	if IsSecretKey(fieldName(at)) {
+		return Mask
+	}
+	if text, ok := value.(string); ok {
+		return fmt.Sprintf("%q", text)
+	}
+	return fmt.Sprintf("%v", value)
 }

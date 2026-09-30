@@ -5,22 +5,34 @@ import "strings"
 // Mask подставляется вместо значений полей, признанных секретными.
 const Mask = "***REDACTED***"
 
-// secretHints — подстроки в именах полей, по которым значение считается секретом.
+// secretHints — признаки секретного поля. Сравнение выполняется
+// с нормализованным именем, поэтому разделители в них не нужны:
+// "access_key", "access-key" и "AccessKey" опознаются одинаково.
 var secretHints = []string{
 	"password",
 	"passwd",
+	"pwd",
+	"passphrase",
 	"secret",
 	"token",
 	"apikey",
-	"api_key",
-	"private_key",
+	"privatekey",
+	"accesskey",
+	"credential",
+	"signature",
 }
 
+// separatorRemover приводит имя поля к виду без разделителей.
+var separatorRemover = strings.NewReplacer("-", "", "_", "", ".", "", " ", "")
+
 // IsSecretKey сообщает, считается ли имя поля секретным.
+//
+// Проверка намеренно широкая: ложно скрытое значение безвредно,
+// а раскрытый пароль — нет.
 func IsSecretKey(key string) bool {
-	lower := strings.ToLower(key)
+	normalized := separatorRemover.Replace(strings.ToLower(key))
 	for _, hint := range secretHints {
-		if strings.Contains(lower, hint) {
+		if strings.Contains(normalized, hint) {
 			return true
 		}
 	}

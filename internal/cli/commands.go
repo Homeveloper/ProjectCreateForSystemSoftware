@@ -46,6 +46,23 @@ func (o *output) emit(cfg config.Config, fallback config.Format) error {
 	return nil
 }
 
+// limitFlags задают границы объёма и сложности входных данных.
+type limitFlags struct {
+	maxBytes int64
+	maxDepth int
+}
+
+func (l *limitFlags) bind(fs *flag.FlagSet) {
+	fs.Int64Var(&l.maxBytes, "max-bytes", config.DefaultLimits.MaxBytes,
+		"предельный размер входного файла в байтах")
+	fs.IntVar(&l.maxDepth, "max-depth", config.DefaultLimits.MaxDepth,
+		"предельная глубина вложенности структур")
+}
+
+func (l limitFlags) limits() config.Limits {
+	return config.Limits{MaxBytes: l.maxBytes, MaxDepth: l.maxDepth}
+}
+
 func newFlagSet(name string) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -74,6 +91,9 @@ func cmdValidate(args []string) error {
 	fs := newFlagSet("validate")
 	schemaPath := fs.String("schema", "", "путь к файлу схемы в формате JSON")
 	verbose := fs.Bool("verbose", false, "выводить подробности разбора")
+	var lim limitFlags
+	lim.bind(fs)
+
 	positional, err := parseArgs(fs, args)
 	if err != nil {
 		return err
@@ -82,17 +102,22 @@ func cmdValidate(args []string) error {
 		return errors.New("использование: cfgtool validate <файл> [--schema <схема.json>]")
 	}
 	path := positional[0]
-	cfg, err := config.Load(path)
+
+	cfg, err := config.LoadWithLimits(path, lim.limits())
 	if err != nil {
 		return err
 	}
 	if *verbose {
-		fmt.Fprintf(os.Stderr, "разобран %s: %#v\n", path, map[string]interface{}(cfg))
+		// Выводится копия со скрытыми секретами: подробный режим
+		// обычно попадает в журнал сборки.
+		fmt.Fprintf(os.Stderr, "разобран %s: %#v\n", path,
+			map[string]interface{}(config.Redact(cfg)))
 	}
 	if *schemaPath == "" {
 		fmt.Printf("%s: синтаксис корректен, схема не задана\n", path)
 		return nil
 	}
+
 	schema, err := config.LoadSchema(*schemaPath)
 	if err != nil {
 		return err
@@ -112,6 +137,9 @@ func cmdConvert(args []string) error {
 	fs := newFlagSet("convert")
 	var out output
 	out.bind(fs)
+	var lim limitFlags
+	lim.bind(fs)
+
 	positional, err := parseArgs(fs, args)
 	if err != nil {
 		return err
@@ -120,11 +148,12 @@ func cmdConvert(args []string) error {
 		return errors.New("использование: cfgtool convert <файл> [-o <имя>] [--out-dir <каталог>]")
 	}
 	path := positional[0]
+
 	sourceFormat, err := config.DetectFormat(path)
 	if err != nil {
 		return err
 	}
-	cfg, err := config.Load(path)
+	cfg, err := config.LoadWithLimits(path, lim.limits())
 	if err != nil {
 		return err
 	}
@@ -139,6 +168,9 @@ func cmdMerge(args []string) error {
 	fs := newFlagSet("merge")
 	var out output
 	out.bind(fs)
+	var lim limitFlags
+	lim.bind(fs)
+
 	positional, err := parseArgs(fs, args)
 	if err != nil {
 		return err
@@ -146,9 +178,10 @@ func cmdMerge(args []string) error {
 	if len(positional) < 2 {
 		return errors.New("использование: cfgtool merge <файл> <файл> [...] [-o <имя>]")
 	}
+
 	merged := config.Config{}
 	for _, path := range positional {
-		cfg, err := config.Load(path)
+		cfg, err := config.LoadWithLimits(path, lim.limits())
 		if err != nil {
 			return err
 		}
@@ -165,6 +198,9 @@ func cmdRedact(args []string) error {
 	fs := newFlagSet("redact")
 	var out output
 	out.bind(fs)
+	var lim limitFlags
+	lim.bind(fs)
+
 	positional, err := parseArgs(fs, args)
 	if err != nil {
 		return err
@@ -173,11 +209,12 @@ func cmdRedact(args []string) error {
 		return errors.New("использование: cfgtool redact <файл> [-o <имя>]")
 	}
 	path := positional[0]
+
 	sourceFormat, err := config.DetectFormat(path)
 	if err != nil {
 		return err
 	}
-	cfg, err := config.Load(path)
+	cfg, err := config.LoadWithLimits(path, lim.limits())
 	if err != nil {
 		return err
 	}

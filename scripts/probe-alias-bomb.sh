@@ -5,14 +5,16 @@
 #   l0: &l0 ["x", ... 9 элементов ...]
 #   l1: &l1 [*l0, ... 9 ссылок ...]
 #   ...
-# при разборе разворачивается в 9^N значений, тогда как сам файл
-# растёт линейно (около 46 байт на уровень).
+# при разборе разворачивается в 9^(N+1) значений, тогда как сам файл
+# растёт линейно — примерно на 46 байт на уровень.
 #
 # Скрипт намеренно ограничен малыми уровнями: цель — измерить
 # коэффициент усиления, а не исчерпать память машины.
-#   - уровни 2..6 (максимум 9^6 = 531 441 значение);
+#   - уровни 2..6 (максимум 9^7 = 4 782 969 значений);
 #   - на каждый запуск лимит времени;
 #   - цикл прекращается, если результат превысил порог размера.
+#
+# Использование: scripts/probe-alias-bomb.sh [каталог-отчётов]
 set -u
 cd "$(dirname "$0")/.."
 
@@ -20,16 +22,14 @@ LABEL="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo local)}"
 OUT_DIR="reports/$LABEL"
 REPORT="$OUT_DIR/dos-alias-bomb.txt"
 MAX_LEVEL=6
-TIME_LIMIT=30          # секунд на один запуск
-SIZE_GUARD=$((64*1024*1024))   # 64 МиБ: порог прекращения цикла
+TIME_LIMIT=30
+SIZE_GUARD=$((64 * 1024 * 1024))
 
 mkdir -p "$OUT_DIR"
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 go build -o "$WORK/cfgtool" ./cmd/cfgtool || exit 1
-
-# мягкое ограничение памяти для среды выполнения Go
 export GOMEMLIMIT=1GiB
 
 make_bomb() {
@@ -49,13 +49,17 @@ make_bomb() {
 
 {
   echo "Демонстрация усиления при разборе YAML с псевдонимами"
-  echo "Продукт: $(git describe --tags --always --dirty 2>/dev/null || echo local)"
-  echo "Ограничения прогона: уровни 2..$MAX_LEVEL, лимит ${TIME_LIMIT}с, порог ${SIZE_GUARD} байт"
+  echo "Состояние продукта: $(git describe --tags --always --dirty 2>/dev/null || echo local)"
+  echo "Ограничения прогона: уровни 2..$MAX_LEVEL, лимит ${TIME_LIMIT}с на запуск,"
+  echo "порог прекращения цикла — $SIZE_GUARD байт результата."
   echo
-  printf '%-7s %-12s %-14s %-16s %-10s %s\n' \
-    "уровни" "вход, Б" "значений" "результат, Б" "время, мс" "усиление"
-  printf '%s\n' "---------------------------------------------------------------------------------"
+  printf '%-7s %-10s %-12s %-14s %-10s %s\n' \
+    "уровни" "вход, Б" "значений" "результат, Б" "время, мс" "итог"
+  printf '%s\n' "-------------------------------------------------------------------------------"
 } > "$REPORT"
+
+rejected=0
+accepted=0
 
 for ((level = 2; level <= MAX_LEVEL; level++)); do
   bomb="$WORK/bomb$level.yaml"
@@ -64,7 +68,8 @@ for ((level = 2; level <= MAX_LEVEL; level++)); do
   values=$((9 ** (level + 1)))
 
   start=$(date +%s%3N)
-  timeout "$TIME_LIMIT" "$WORK/cfgtool" convert "$bomb" > "$WORK/out$level.json" 2> "$WORK/err$level.txt"
+  timeout "$TIME_LIMIT" "$WORK/cfgtool" convert "$bomb" \
+    > "$WORK/out$level.json" 2> "$WORK/err$level.txt"
   rc=$?
   end=$(date +%s%3N)
 
@@ -72,17 +77,20 @@ for ((level = 2; level <= MAX_LEVEL; level++)); do
   elapsed=$((end - start))
 
   if [ "$rc" -eq 124 ]; then
-    printf '%-7s %-12s %-14s %-16s %-10s %s\n' \
-      "$level" "$in_size" "$values" "-" ">${TIME_LIMIT}000" "прервано по времени" >> "$REPORT"
-    echo "уровень $level: прервано по лимиту времени" >&2
-    break
+    outcome="прервано по лимиту времени"
+  elif [ "$rc" -ne 0 ]; then
+    rejected=$((rejected + 1))
+    outcome="отклонено: $(head -1 "$WORK/err$level.txt" | sed 's/^cfgtool: //')"
+  else
+    accepted=$((accepted + 1))
+    outcome="принято, усиление x$((out_size / in_size))"
   fi
 
-  ratio=$((out_size / in_size))
-  printf '%-7s %-12s %-14s %-16s %-10s %s\n' \
-    "$level" "$in_size" "$values" "$out_size" "$elapsed" "x$ratio" >> "$REPORT"
-  echo "уровень $level: вход ${in_size}B -> результат ${out_size}B за ${elapsed}ms (x$ratio)"
+  printf '%-7s %-10s %-12s %-14s %-10s %s\n' \
+    "$level" "$in_size" "$values" "$out_size" "$elapsed" "$outcome" >> "$REPORT"
+  echo "уровень $level: $outcome"
 
+  [ "$rc" -eq 124 ] && break
   if [ "$out_size" -gt "$SIZE_GUARD" ]; then
     echo "порог размера превышен, дальнейшие уровни не запускаются" >> "$REPORT"
     echo "порог размера превышен, останов" >&2
@@ -92,13 +100,13 @@ done
 
 {
   echo
-  echo "Вывод: каждая добавленная строка увеличивает объём разбираемых данных"
-  echo "примерно в 9 раз, а сам файл — примерно на 46 байт. Исходная версия"
-  echo "продукта не ограничивает ни число раскрываемых псевдонимов, ни размер"
-  echo "входных данных, поэтому рост ограничен только памятью машины."
-  echo "Экстраполяция замеренного роста (в прогоне не выполнялась):"
-  echo "  уровень  9 -> около 3.9e9 значений"
-  echo "  уровень 10 -> около 3.5e10 значений"
+  echo "Принято уровней: $accepted, отклонено: $rejected."
+  echo
+  echo "Как читать. Объём разбираемых данных растёт примерно в 9 раз на каждую"
+  echo "добавленную строку, а сам файл — примерно на 46 байт. Если продукт"
+  echo "принимает такой файл, объём работы ограничен только памятью машины:"
+  echo "уровень 9 соответствует примерно 3.9e9 значений, уровень 10 — 3.5e10."
+  echo "Если продукт отклоняет файл, в колонке итога указана причина отказа."
 } >> "$REPORT"
 
 echo
