@@ -1,0 +1,44 @@
+[gosec] 2026/10/01 00:34:17 Including rules: default
+[gosec] 2026/10/01 00:34:18 Excluding rules: default
+[gosec] 2026/10/01 00:34:18 Including analyzers: default
+[gosec] 2026/10/01 00:34:18 Excluding analyzers: default
+[gosec] 2026/10/01 00:34:18 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\config
+[gosec] 2026/10/01 00:34:18 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool
+[gosec] 2026/10/01 00:34:18 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli
+[gosec] 2026/10/01 00:34:18 Checking package: cli
+[gosec] 2026/10/01 00:34:18 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\cli.go
+[gosec] 2026/10/01 00:34:18 Checking package: config
+[gosec] 2026/10/01 00:34:18 Checking package: main
+[gosec] 2026/10/01 00:34:18 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\commands.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\format.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool\main.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\limits.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\load.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\merge.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\redact.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\schema.go
+[gosec] 2026/10/01 00:34:20 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\write.go
+Results:
+
+
+[D:\Учёба\ProjectCreateForSystemSoftware\internal\config\schema.go:27] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    26: func LoadSchema(path string) (*Schema, error) {
+  > 27: 	raw, err := os.ReadFile(path)
+    28: 	if err != nil {
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+[D:\Учёба\ProjectCreateForSystemSoftware\internal\config\load.go:30] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    29: 
+  > 30: 	file, err := os.Open(path)
+    31: 	if err != nil {
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+Summary:
+  Gosec  : dev
+  Files  : 10
+  Lines  : 981
+  Nosec  : 0
+  Issues : 2
+
