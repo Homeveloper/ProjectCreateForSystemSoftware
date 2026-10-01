@@ -14,6 +14,6 @@ var version = "dev"
 func main() {
 	if err := cli.Run(os.Args[1:], version); err != nil {
 		fmt.Fprintf(os.Stderr, "cfgtool: %v\n", err)
-		os.Exit(1)
+		os.Exit(cli.ExitCodeFor(err))
 	}
 }

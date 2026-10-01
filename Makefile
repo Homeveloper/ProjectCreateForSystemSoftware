@@ -1,6 +1,6 @@
 BINARY   := cfgtool
 VERSION  ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-REPORTS  := reports
+REPORTS  := evidence
 
 .PHONY: build test vet fmt check sec vuln staticcheck release clean
 

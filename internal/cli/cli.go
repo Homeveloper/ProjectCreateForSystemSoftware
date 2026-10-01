@@ -14,24 +14,39 @@ const usage = `cfgtool — проверка и преобразование ко
 
 Команды:
   validate <файл> [--schema <схема.json>]      проверить синтаксис и соответствие схеме
+  summary  <файл>                              краткое описание без записи результата
   convert  <файл> [-o <имя>] [--out-dir <кат>] преобразовать между YAML и JSON
   merge    <файл> <файл> [...] [-o <имя>]      объединить конфигурации по порядку
   redact   <файл> [-o <имя>]                   скрыть значения секретных полей
   version                                      вывести версию
   help                                         вывести эту справку
 
-Если -o не задан, результат выводится в стандартный поток вывода.
+Общие флаги:
+  -o <имя>            файл результата; без него результат идёт в стандартный вывод
+  --out-dir <каталог> каталог результата, выход за его пределы отклоняется
+  --force             разрешить замену существующего файла результата
+  --max-bytes <N>     предельный размер входного файла, по умолчанию 10485760
+  --max-depth <N>     предельная глубина вложенности, по умолчанию 64
+
+Коды завершения:
+  0  успешно
+  1  ошибка в аргументах командной строки
+  2  входной файл не прочитан или не разобран
+  3  конфигурация нарушает схему
+  4  результат не записан
 `
 
 // Run выполняет команду, переданную в аргументах.
 func Run(args []string, version string) error {
 	if len(args) == 0 {
 		fmt.Fprint(os.Stderr, usage)
-		return errors.New("команда не указана")
+		return withCode(ExitUsage, errors.New("команда не указана"))
 	}
 	switch args[0] {
 	case "validate":
 		return cmdValidate(args[1:])
+	case "summary":
+		return cmdSummary(args[1:])
 	case "convert":
 		return cmdConvert(args[1:])
 	case "merge":
@@ -46,6 +61,6 @@ func Run(args []string, version string) error {
 		return nil
 	default:
 		fmt.Fprint(os.Stderr, usage)
-		return fmt.Errorf("неизвестная команда %q", args[0])
+		return withCode(ExitUsage, fmt.Errorf("неизвестная команда %q", args[0]))
 	}
 }

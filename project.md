@@ -81,7 +81,7 @@
 
 ## 5. Результаты проверок исходного состояния
 
-Отчёты: [reports/baseline-v0.1.0/](reports/baseline-v0.1.0/).
+Отчёты: [evidence/baseline-v0.1.0/](evidence/baseline-v0.1.0/).
 
 ### govulncheck
 
@@ -116,7 +116,7 @@
 
 ### Целевой эксперимент
 
-Отчёт: [reports/baseline-v0.1.0/dos-alias-bomb.txt](reports/baseline-v0.1.0/dos-alias-bomb.txt).
+Отчёт: [evidence/baseline-v0.1.0/dos-alias-bomb.txt](evidence/baseline-v0.1.0/dos-alias-bomb.txt).
 
 | Уровни | Вход, байт | Значений при разборе | Результат, байт | Усиление |
 |---|---|---|---|---|
@@ -132,7 +132,7 @@
 ## 6. Существенные разрывы
 
 Каждый разрыв закреплён негативным тестом, который на `v0.1.0` не проходит.
-Отчёт: [reports/baseline-v0.1.0/security-tests.txt](reports/baseline-v0.1.0/security-tests.txt)
+Отчёт: [evidence/baseline-v0.1.0/security-tests.txt](evidence/baseline-v0.1.0/security-tests.txt)
 (18 успешных, 8 падений, 2 пропуска).
 
 | № | Разрыв | Тест | Как найден |
@@ -200,7 +200,7 @@
 ## 9. Повторная проверка
 
 Тот же набор инструментов, те же скрипты, то же покрытие сценариев.
-Отчёты: [reports/release-v1.0.0/](reports/release-v1.0.0/).
+Отчёты: [evidence/release-v1.0.0/](evidence/release-v1.0.0/).
 
 | Проверка | `v0.1.0` | `v1.0.0` |
 |---|---|---|
@@ -213,7 +213,7 @@
 | Демонстрация отказа в обслуживании | 332 байта раскрываются в 251 МБ | 4 уровня из 5 отклонены |
 
 Сообщение при отклонении бомбы: `yaml: document contains excessive aliasing`.
-Отчёт: [reports/release-v1.0.0/dos-alias-bomb.txt](reports/release-v1.0.0/dos-alias-bomb.txt).
+Отчёт: [evidence/release-v1.0.0/dos-alias-bomb.txt](evidence/release-v1.0.0/dos-alias-bomb.txt).
 
 Покрытие не изменилось, хотя объём кода вырос: новые модули закрыты
 негативными тестами примерно в той же доле, что и прежние функциональные.
@@ -256,13 +256,13 @@
 
 Выпуск: сборки под linux/amd64 и windows/amd64, `CGO_ENABLED=0`,
 `-trimpath`, контрольные суммы SHA-256 и состав вшитых зависимостей.
-Отчёт: [reports/release-v1.0.0/release-artifacts.txt](reports/release-v1.0.0/release-artifacts.txt).
+Отчёт: [evidence/release-v1.0.0/release-artifacts.txt](evidence/release-v1.0.0/release-artifacts.txt).
 
 ## 12. Что показать на защите
 
 1. Пользовательский сценарий: `validate`, `convert`, `merge`, `redact`
    на `testdata/app.yaml`.
-2. Исходное состояние: тег `v0.1.0`, отчёты в `reports/baseline-v0.1.0/`.
+2. Исходное состояние: тег `v0.1.0`, отчёты в `evidence/baseline-v0.1.0/`.
 3. Находки: три уязвимости `govulncheck` с достижимостью кода,
    четыре находки `gosec`, восемь падающих негативных тестов.
 4. Измеренное подтверждение: 332 байта раскрываются в 251 МБ, усиление
@@ -288,7 +288,7 @@ scripts/reproduce-baseline.sh
 
 Скрипт разворачивает отдельное рабочее дерево на теге `v0.1.0`, переносит
 в него текущие тесты и скрипты, прогоняет проверки и складывает результат
-в `reports/baseline-v0.1.0-reproduced/`.
+в `evidence/baseline-v0.1.0-reproduced/`.
 
 Сверка воспроизведённого прогона с сохранёнными отчётами:
 

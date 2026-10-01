@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Полный набор проверок продукта.
 # Использование: scripts/check.sh [каталог-отчётов]
-# По умолчанию — reports/<текущий-тег-или-коммит>.
+# По умолчанию — evidence/<текущий-тег-или-коммит>.
 # Скрипт не прерывается на находках: цель — собрать полную картину.
 set -u
 cd "$(dirname "$0")/.."
 export PATH="$PATH:$(cygpath -u "$(go env GOPATH)" 2>/dev/null || go env GOPATH)/bin"
 
 LABEL="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo local)}"
-DIR="reports/$LABEL"
+DIR="evidence/$LABEL"
 mkdir -p "$DIR"
 echo "Отчёты: $DIR"
 echo

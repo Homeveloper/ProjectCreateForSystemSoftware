@@ -2,12 +2,12 @@
 # Воспроизведение проверок исходного состояния продукта.
 #
 # Код продукта берётся из тега v0.1.0, проверочная оснастка — текущая.
-# Так и были получены отчёты в reports/baseline-v0.1.0/: негативные тесты
+# Так и были получены отчёты в evidence/baseline-v0.1.0/: негативные тесты
 # и скрипты появились уже после фиксации исходного состояния, но выполнялись
 # против того же кода продукта. Оснастка меняться может, продукт — нет:
 # иначе сравнение "до и после" теряет смысл.
 #
-# Результат складывается в reports/baseline-v0.1.0-reproduced/,
+# Результат складывается в evidence/baseline-v0.1.0-reproduced/,
 # чтобы его можно было сравнить с сохранёнными отчётами.
 set -u
 
@@ -15,7 +15,7 @@ cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 BASELINE_TAG="v0.1.0"
 LABEL="baseline-v0.1.0"
-TARGET="$ROOT/reports/${LABEL}-reproduced"
+TARGET="$ROOT/evidence/${LABEL}-reproduced"
 
 if ! git rev-parse --verify --quiet "$BASELINE_TAG" >/dev/null; then
   echo "тег $BASELINE_TAG не найден" >&2
@@ -45,10 +45,10 @@ bash scripts/check.sh "$LABEL"
 bash scripts/probe-alias-bomb.sh "$LABEL" >/dev/null
 
 mkdir -p "$TARGET"
-cp -r "$WORKTREE/reports/$LABEL/." "$TARGET/"
+cp -r "$WORKTREE/evidence/$LABEL/." "$TARGET/"
 
 echo
-echo "Отчёты: reports/${LABEL}-reproduced/"
+echo "Отчёты: evidence/${LABEL}-reproduced/"
 echo
 echo "Ожидаемый результат на исходном состоянии:"
 echo "  - govulncheck: три уязвимости в gopkg.in/yaml.v2 v2.2.2"

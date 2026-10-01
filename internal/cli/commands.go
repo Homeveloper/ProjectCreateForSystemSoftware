@@ -13,11 +13,13 @@ import (
 type output struct {
 	name   string
 	outDir string
+	force  bool
 }
 
 func (o *output) bind(fs *flag.FlagSet) {
 	fs.StringVar(&o.name, "o", "", "имя файла результата (по умолчанию — стандартный вывод)")
 	fs.StringVar(&o.outDir, "out-dir", ".", "каталог, в который записывается результат")
+	fs.BoolVar(&o.force, "force", false, "разрешить замену существующего файла результата")
 }
 
 // emit записывает результат в файл или в стандартный вывод.
@@ -26,21 +28,24 @@ func (o *output) emit(cfg config.Config, fallback config.Format) error {
 	if o.name != "" {
 		detected, err := config.DetectFormat(o.name)
 		if err != nil {
-			return err
+			return withCode(ExitUsage, err)
 		}
 		format = detected
 	}
 	data, err := config.Encode(cfg, format)
 	if err != nil {
-		return err
+		return withCode(ExitOutput, err)
 	}
 	if o.name == "" {
-		_, err = os.Stdout.Write(data)
-		return err
+		if _, err := os.Stdout.Write(data); err != nil {
+			return withCode(ExitOutput, err)
+		}
+		return nil
 	}
-	path, err := config.Save(o.outDir, o.name, data)
+	path, err := config.SaveWithOptions(o.outDir, o.name, data,
+		config.SaveOptions{Overwrite: o.force})
 	if err != nil {
-		return err
+		return withCode(ExitOutput, err)
 	}
 	fmt.Printf("записано: %s\n", path)
 	return nil
@@ -63,6 +68,15 @@ func (l limitFlags) limits() config.Limits {
 	return config.Limits{MaxBytes: l.maxBytes, MaxDepth: l.maxDepth}
 }
 
+// load читает конфигурацию, помечая неудачу кодом входной ошибки.
+func (l limitFlags) load(path string) (config.Config, error) {
+	cfg, err := config.LoadWithLimits(path, l.limits())
+	if err != nil {
+		return nil, withCode(ExitInput, err)
+	}
+	return cfg, nil
+}
+
 func newFlagSet(name string) *flag.FlagSet {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(os.Stderr)
@@ -76,7 +90,7 @@ func parseArgs(fs *flag.FlagSet, args []string) ([]string, error) {
 	var positional []string
 	for {
 		if err := fs.Parse(args); err != nil {
-			return nil, err
+			return nil, withCode(ExitUsage, err)
 		}
 		rest := fs.Args()
 		if len(rest) == 0 {
@@ -85,6 +99,10 @@ func parseArgs(fs *flag.FlagSet, args []string) ([]string, error) {
 		positional = append(positional, rest[0])
 		args = rest[1:]
 	}
+}
+
+func usageError(text string) error {
+	return withCode(ExitUsage, errors.New(text))
 }
 
 func cmdValidate(args []string) error {
@@ -99,11 +117,11 @@ func cmdValidate(args []string) error {
 		return err
 	}
 	if len(positional) != 1 {
-		return errors.New("использование: cfgtool validate <файл> [--schema <схема.json>]")
+		return usageError("использование: cfgtool validate <файл> [--schema <схема.json>]")
 	}
 	path := positional[0]
 
-	cfg, err := config.LoadWithLimits(path, lim.limits())
+	cfg, err := lim.load(path)
 	if err != nil {
 		return err
 	}
@@ -120,16 +138,61 @@ func cmdValidate(args []string) error {
 
 	schema, err := config.LoadSchema(*schemaPath)
 	if err != nil {
-		return err
+		return withCode(ExitInput, err)
 	}
 	problems := schema.Validate(cfg)
 	if len(problems) > 0 {
 		for _, problem := range problems {
 			fmt.Fprintln(os.Stderr, "  - "+problem)
 		}
-		return fmt.Errorf("%s: нарушений схемы — %d", path, len(problems))
+		return withCode(ExitSchema,
+			fmt.Errorf("%s: нарушений схемы — %d", path, len(problems)))
 	}
 	fmt.Printf("%s: соответствует схеме %s\n", path, *schemaPath)
+	return nil
+}
+
+// cmdSummary — режим краткого просмотра: ничего не записывает
+// и не выводит значений полей.
+func cmdSummary(args []string) error {
+	fs := newFlagSet("summary")
+	var lim limitFlags
+	lim.bind(fs)
+
+	positional, err := parseArgs(fs, args)
+	if err != nil {
+		return err
+	}
+	if len(positional) != 1 {
+		return usageError("использование: cfgtool summary <файл>")
+	}
+	path := positional[0]
+
+	format, err := config.DetectFormat(path)
+	if err != nil {
+		return withCode(ExitUsage, err)
+	}
+	info, err := os.Stat(path)
+	if err != nil {
+		return withCode(ExitInput, fmt.Errorf("чтение сведений о %s: %w", path, err))
+	}
+	cfg, err := lim.load(path)
+	if err != nil {
+		return err
+	}
+
+	summary := config.Summarize(cfg)
+	fmt.Printf("%s\n", path)
+	fmt.Printf("  формат:                 %s\n", format)
+	fmt.Printf("  размер:                 %d байт\n", info.Size())
+	fmt.Printf("  полей верхнего уровня:  %d\n", summary.TopLevelKeys)
+	fmt.Printf("  всего полей:            %d\n", summary.Fields)
+	fmt.Printf("  конечных значений:      %d\n", summary.Leaves)
+	fmt.Printf("  глубина вложенности:    %d\n", summary.MaxDepth)
+	fmt.Printf("  секретных полей:        %d\n", len(summary.SecretFields))
+	for _, field := range summary.SecretFields {
+		fmt.Printf("    %s\n", field)
+	}
 	return nil
 }
 
@@ -145,15 +208,15 @@ func cmdConvert(args []string) error {
 		return err
 	}
 	if len(positional) != 1 {
-		return errors.New("использование: cfgtool convert <файл> [-o <имя>] [--out-dir <каталог>]")
+		return usageError("использование: cfgtool convert <файл> [-o <имя>] [--out-dir <каталог>] [--force]")
 	}
 	path := positional[0]
 
 	sourceFormat, err := config.DetectFormat(path)
 	if err != nil {
-		return err
+		return withCode(ExitUsage, err)
 	}
-	cfg, err := config.LoadWithLimits(path, lim.limits())
+	cfg, err := lim.load(path)
 	if err != nil {
 		return err
 	}
@@ -176,12 +239,12 @@ func cmdMerge(args []string) error {
 		return err
 	}
 	if len(positional) < 2 {
-		return errors.New("использование: cfgtool merge <файл> <файл> [...] [-o <имя>]")
+		return usageError("использование: cfgtool merge <файл> <файл> [...] [-o <имя>] [--force]")
 	}
 
 	merged := config.Config{}
 	for _, path := range positional {
-		cfg, err := config.LoadWithLimits(path, lim.limits())
+		cfg, err := lim.load(path)
 		if err != nil {
 			return err
 		}
@@ -189,7 +252,7 @@ func cmdMerge(args []string) error {
 	}
 	baseFormat, err := config.DetectFormat(positional[0])
 	if err != nil {
-		return err
+		return withCode(ExitUsage, err)
 	}
 	return out.emit(merged, baseFormat)
 }
@@ -206,15 +269,15 @@ func cmdRedact(args []string) error {
 		return err
 	}
 	if len(positional) != 1 {
-		return errors.New("использование: cfgtool redact <файл> [-o <имя>]")
+		return usageError("использование: cfgtool redact <файл> [-o <имя>] [--force]")
 	}
 	path := positional[0]
 
 	sourceFormat, err := config.DetectFormat(path)
 	if err != nil {
-		return err
+		return withCode(ExitUsage, err)
 	}
-	cfg, err := config.LoadWithLimits(path, lim.limits())
+	cfg, err := lim.load(path)
 	if err != nil {
 		return err
 	}

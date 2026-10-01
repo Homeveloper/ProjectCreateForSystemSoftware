@@ -19,7 +19,7 @@ set -u
 cd "$(dirname "$0")/.."
 
 LABEL="${1:-$(git describe --tags --always --dirty 2>/dev/null || echo local)}"
-OUT_DIR="reports/$LABEL"
+OUT_DIR="evidence/$LABEL"
 REPORT="$OUT_DIR/dos-alias-bomb.txt"
 MAX_LEVEL=6
 TIME_LIMIT=30
