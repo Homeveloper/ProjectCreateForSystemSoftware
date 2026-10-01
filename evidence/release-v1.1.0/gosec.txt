@@ -1,25 +1,25 @@
-[gosec] 2026/10/01 16:39:08 Including rules: default
-[gosec] 2026/10/01 16:39:08 Excluding rules: default
-[gosec] 2026/10/01 16:39:08 Including analyzers: default
-[gosec] 2026/10/01 16:39:08 Excluding analyzers: default
-[gosec] 2026/10/01 16:39:11 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool
-[gosec] 2026/10/01 16:39:11 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli
-[gosec] 2026/10/01 16:39:11 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\config
-[gosec] 2026/10/01 16:39:11 Checking package: main
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool\main.go
-[gosec] 2026/10/01 16:39:11 Checking package: cli
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\cli.go
-[gosec] 2026/10/01 16:39:11 Checking package: config
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\format.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\limits.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\commands.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\load.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\exit.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\merge.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\redact.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\schema.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\summary.go
-[gosec] 2026/10/01 16:39:11 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\write.go
+[gosec] 2026/10/01 17:00:47 Including rules: default
+[gosec] 2026/10/01 17:00:47 Excluding rules: default
+[gosec] 2026/10/01 17:00:47 Including analyzers: default
+[gosec] 2026/10/01 17:00:47 Excluding analyzers: default
+[gosec] 2026/10/01 17:00:47 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli
+[gosec] 2026/10/01 17:00:47 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\internal\config
+[gosec] 2026/10/01 17:00:47 Import directory: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool
+[gosec] 2026/10/01 17:00:48 Checking package: config
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\format.go
+[gosec] 2026/10/01 17:00:48 Checking package: cli
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\cli.go
+[gosec] 2026/10/01 17:00:48 Checking package: main
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\cmd\cfgtool\main.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\limits.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\commands.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\load.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\cli\exit.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\merge.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\redact.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\schema.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\summary.go
+[gosec] 2026/10/01 17:00:48 Checking file: D:\Учёба\ProjectCreateForSystemSoftware\internal\config\write.go
 Results:
 
 

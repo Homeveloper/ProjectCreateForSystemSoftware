@@ -108,3 +108,36 @@ func TestSummarizeCountsWithoutRevealingValues(t *testing.T) {
 		}
 	}
 }
+
+// Запись через символьную ссылку уводит результат за пределы каталога,
+// поэтому отклоняется независимо от --force.
+//
+// На Windows без прав администратора символьные ссылки не создаются,
+// поэтому тест пропускается и выполняется в CI на Linux.
+func TestSaveRefusesSymlink(t *testing.T) {
+	dir := t.TempDir()
+
+	victim := filepath.Join(dir, "victim.txt")
+	const original = "важные данные\n"
+	if err := os.WriteFile(victim, []byte(original), 0o600); err != nil {
+		t.Fatalf("подготовка файла: %v", err)
+	}
+
+	link := filepath.Join(dir, "out.json")
+	if err := os.Symlink(victim, link); err != nil {
+		t.Skipf("символьные ссылки недоступны в этой среде: %v", err)
+	}
+
+	if _, err := SaveWithOptions(dir, "out.json", []byte("{}\n"),
+		SaveOptions{Overwrite: true}); err == nil {
+		t.Fatal("запись через символьную ссылку выполнена; ожидался отказ")
+	}
+
+	data, err := os.ReadFile(victim)
+	if err != nil {
+		t.Fatalf("чтение файла по ссылке: %v", err)
+	}
+	if string(data) != original {
+		t.Errorf("файл по ссылке изменён: %q", data)
+	}
+}

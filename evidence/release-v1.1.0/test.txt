@@ -97,12 +97,12 @@ cfgtool — проверка и преобразование конфигура�
   - $: отсутствует обязательное поле "database"
 --- PASS: TestRunValidateReportsSchemaProblems (0.00s)
 === RUN   TestRunConvertWritesFile
-записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunConvertWritesFile4071471707\001\app.json
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunConvertWritesFile708694670\001\app.json
 --- PASS: TestRunConvertWritesFile (0.00s)
 === RUN   TestRunMergeRequiresTwoFiles
 --- PASS: TestRunMergeRequiresTwoFiles (0.00s)
 === RUN   TestRunRedactWritesFile
-записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunRedactWritesFile999674284\001\safe.yaml
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestRunRedactWritesFile2818429780\001\safe.yaml
 --- PASS: TestRunRedactWritesFile (0.00s)
 === RUN   TestExitCodesDistinguishFailures
 === RUN   TestExitCodesDistinguishFailures/успех
@@ -150,8 +150,8 @@ cfgtool — проверка и преобразование конфигура�
     --- PASS: TestExitCodesDistinguishFailures/нарушение_схемы (0.00s)
     --- PASS: TestExitCodesDistinguishFailures/результат_за_пределами_каталога (0.00s)
 === RUN   TestConvertRefusesToOverwriteWithoutForce
-записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesToOverwriteWithoutForce2118994344\001\app.json
-записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesToOverwriteWithoutForce2118994344\001\app.json
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesToOverwriteWithoutForce1876744152\001\app.json
+записано: C:\Users\MAXGAD~1\AppData\Local\Temp\TestConvertRefusesToOverwriteWithoutForce1876744152\001\app.json
 --- PASS: TestConvertRefusesToOverwriteWithoutForce (0.00s)
 === RUN   TestSummaryWritesNothingAndHidesValues
 --- PASS: TestSummaryWritesNothingAndHidesValues (0.00s)
@@ -161,7 +161,7 @@ cfgtool — проверка и преобразование конфигура�
 === RUN   TestConvertRefusesOutputOutsideOutDir
 --- PASS: TestConvertRefusesOutputOutsideOutDir (0.00s)
 PASS
-ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.032s
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.030s
 === RUN   TestDetectFormat
 --- PASS: TestDetectFormat (0.00s)
 === RUN   TestLoadYAML
@@ -191,7 +191,7 @@ ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.032s
     security_test.go:62: права доступа POSIX на Windows не применяются
 --- SKIP: TestSaveUsesRestrictiveDirectoryPermissions (0.00s)
 === RUN   TestLoadRejectsOversizedFile
---- PASS: TestLoadRejectsOversizedFile (0.02s)
+--- PASS: TestLoadRejectsOversizedFile (0.04s)
 === RUN   TestDecodeRejectsExcessiveNesting
 --- PASS: TestDecodeRejectsExcessiveNesting (0.00s)
 === RUN   TestDecodeErrorDoesNotLeakFileContent
@@ -210,5 +210,8 @@ ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/cli	0.032s
 --- PASS: TestSaveRefusesDirectory (0.00s)
 === RUN   TestSummarizeCountsWithoutRevealingValues
 --- PASS: TestSummarizeCountsWithoutRevealingValues (0.00s)
+=== RUN   TestSaveRefusesSymlink
+    write_test.go:128: символьные ссылки недоступны в этой среде: symlink C:\Users\MAXGAD~1\AppData\Local\Temp\TestSaveRefusesSymlink947267143\001\victim.txt C:\Users\MAXGAD~1\AppData\Local\Temp\TestSaveRefusesSymlink947267143\001\out.json: A required privilege is not held by the client.
+--- SKIP: TestSaveRefusesSymlink (0.00s)
 PASS
-ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/config	0.053s
+ok  	github.com/Homeveloper/ProjectCreateForSystemSoftware/internal/config	0.073s
